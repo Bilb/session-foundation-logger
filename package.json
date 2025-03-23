@@ -1,0 +1,24 @@
+{
+  "name": "@session-foundation/logger",
+  "version": "0.0.1",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "repository": "git@github.com:Bilb/session-foundation-logger.git",
+  "author": "Audric Ackermann <audric@getsession.org>",
+  "license": "MIT",
+  "files": [
+    "dist/"
+  ],
+  "scripts": {
+    "build": "rm -rf dist/;  tsc",
+    "dev": "tsc --watch"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.11",
+    "typescript": "^5.8.2"
+  },
+  "dependencies": {},
+  "publishConfig": {
+    "registry": "http://localhost:4873"
+  }
+}
