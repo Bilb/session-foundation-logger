@@ -10,41 +10,40 @@ enum LogLevel {
   Fatal = 60,
 }
 
+export type ScopeType = `[${string}]`;
+
 export class Logger {
-  private logFn: LogFn | null = null;
+  private static loggers: Map<ScopeType, LogFn> = new Map();
 
-  constructor(logFn: LogFn) {
-    this.logFn = logFn;
-  }
-
-  private log(level: LogLevel, ...args: unknown[]) {
-    if (!this.logFn) {
-      throw new Error('Logger is not initialized: call setLogFn() first.');
+  static setLogFn(scope: ScopeType, logFn: LogFn) {
+    if (Logger.loggers.has(scope)) {
+      throw new Error('Logger already initialised');
     }
-    this.logFn(level, ...args);
+    Logger.loggers.set(scope, logFn);
   }
 
-  public trace(...args: unknown[]) {
-    this.log(LogLevel.Trace, ...args);
+  private static getLogFn(scope: ScopeType): LogFn {
+    const fn = Logger.loggers.get(scope);
+    if (!fn) {
+      throw new Error(`Logger not initialized for scope "${scope}"`);
+    }
+    return fn;
   }
 
-  public debug(...args: unknown[]) {
-    this.log(LogLevel.Debug, ...args);
-  }
+  static for(scope: ScopeType) {
+    const call =
+      (level: LogLevel) =>
+      (...args: unknown[]) => {
+        Logger.getLogFn(scope)(level, scope, ...args);
+      };
 
-  public info(...args: unknown[]) {
-    this.log(LogLevel.Info, ...args);
-  }
-
-  public warn(...args: unknown[]) {
-    this.log(LogLevel.Warn, ...args);
-  }
-
-  public error(...args: unknown[]) {
-    this.log(LogLevel.Error, ...args);
-  }
-
-  public fatal(...args: unknown[]) {
-    this.log(LogLevel.Fatal, ...args);
+    return {
+      trace: call(LogLevel.Trace),
+      debug: call(LogLevel.Debug),
+      info: call(LogLevel.Info),
+      warn: call(LogLevel.Warn),
+      error: call(LogLevel.Error),
+      fatal: call(LogLevel.Fatal),
+    };
   }
 }
