@@ -8,6 +8,7 @@ export type LoggerType = {
   debug: LogFn;
   trace: LogFn;
 };
+
 // Those are pretty standard and match https://getpino.io/#/docs/api?id=loggerlevels-object
 enum LogLevel {
   Trace = 10,
@@ -23,20 +24,39 @@ type LogAtLevelFnType = (
   ...args: ReadonlyArray<unknown>
 ) => void;
 
-let logAtLevel: LogAtLevelFnType = () => {};
-let hasInitialized = false;
+export class Logger {
+  private logFn: LogFn | null = null;
 
-export const trace: LogFn = (...args) => logAtLevel(LogLevel.Trace, ...args);
-export const debug: LogFn = (...args) => logAtLevel(LogLevel.Debug, ...args);
-export const info: LogFn = (...args) => logAtLevel(LogLevel.Info, ...args);
-export const warn: LogFn = (...args) => logAtLevel(LogLevel.Warn, ...args);
-export const error: LogFn = (...args) => logAtLevel(LogLevel.Error, ...args);
-export const fatal: LogFn = (...args) => logAtLevel(LogLevel.Fatal, ...args);
+  constructor(private label?: string) {}
 
-export function setLogAtLevel(log: LogAtLevelFnType): void {
-  if (hasInitialized) {
-    throw new Error('Logger has already been initialized');
+  setLogFn(fn: LogFn) {
+    this.logFn = fn;
   }
-  logAtLevel = log;
-  hasInitialized = true;
+
+  private log(level: LogLevel, ...args: unknown[]) {
+    if (!this.logFn) {
+      throw new Error('Logger is not initialized: call setLogFn() first.');
+    }
+    const prefix = this.label ? `[${this.label}]` : '';
+    this.logFn(level, prefix, ...args);
+  }
+
+  trace(...args: unknown[]) {
+    this.log(LogLevel.Trace, ...args);
+  }
+  debug(...args: unknown[]) {
+    this.log(LogLevel.Debug, ...args);
+  }
+  info(...args: unknown[]) {
+    this.log(LogLevel.Info, ...args);
+  }
+  warn(...args: unknown[]) {
+    this.log(LogLevel.Warn, ...args);
+  }
+  error(...args: unknown[]) {
+    this.log(LogLevel.Error, ...args);
+  }
+  fatal(...args: unknown[]) {
+    this.log(LogLevel.Fatal, ...args);
+  }
 }
