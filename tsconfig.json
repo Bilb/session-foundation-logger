@@ -2,7 +2,7 @@
   "compilerOptions": {
     "outDir": "dist",
     "declaration": true,
-    "lib": ["es2021"],
+    "lib": ["es2021", "dom"],
     "module": "esnext",
     "target": "es2020",
     "moduleResolution": "node",
